@@ -9,10 +9,11 @@ namespace core {
 class Device
 {
 public:
-    Device();
-
+    Device(const cl_device_id &device);
+    void print_info();
+    static std::vector<Device> get_devices();
 private:
-    std::unique_ptr<cl::Device> _device;
+    std::shared_ptr<cl::Device> _device;
 };
 
 }

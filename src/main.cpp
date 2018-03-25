@@ -3,8 +3,12 @@
 
 int main(int argc, char * argv[])
 {
-    utils::Logger logger;
+    Logger logger;
     LOG("GDS online");
-    core::Device device;
+    std::vector<core::Device> devices = core::Device::get_devices();
+    for (auto& device : devices)
+    {
+        device.print_info();
+    }
     return 0;
 }

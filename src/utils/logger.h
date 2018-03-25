@@ -4,9 +4,7 @@
 #include <string>
 #include <mutex>
 
-#define LOG(text) utils::Logger::instance().log(text)
-
-namespace utils {
+#define LOG(text) Logger::instance().log(text)
 
 class Logger
 {
@@ -22,7 +20,5 @@ private:
     static Logger* _this;
     std::mutex _mutex;
 };
-
-}
 
 #endif
