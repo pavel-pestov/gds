@@ -1,6 +1,9 @@
-#include <iostrim>
+#include <iostream>
+#include "cl/device.h"
 
-void main(int argc, char * argv[])
+int main(int argc, char * argv[])
 {
-	std::cout<<"gds online"<<std::endle;
+    std::cout << "gds online" << std::endl;
+    Cl::Device device;
+    return 0;
 }
