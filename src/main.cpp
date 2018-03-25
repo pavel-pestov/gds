@@ -1,9 +1,10 @@
-#include <iostream>
-#include "cl/device.h"
+#include "core/device.h"
+#include "utils/logger.h"
 
 int main(int argc, char * argv[])
 {
-    std::cout << "gds online" << std::endl;
-    Cl::Device device;
+    utils::Logger logger;
+    LOG("GDS online");
+    core::Device device;
     return 0;
 }
