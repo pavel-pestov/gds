@@ -4,6 +4,8 @@
 #include <string>
 #include <sstream>
 
+namespace gds {
+
 inline std::string to_string(const char* x)
 {
     return std::string(x);
@@ -21,4 +23,6 @@ template<typename T> inline std::string to_string(const T& t)
     return ss.str();
 }
 
-#endif
+}
+
+#endif // _UTILS_H_

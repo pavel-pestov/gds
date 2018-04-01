@@ -4,7 +4,9 @@
 #include <CL/cl2.hpp>
 #include <memory>
 
-namespace core {
+namespace gds {
+
+namespace ocl {
 
 class Device
 {
@@ -18,4 +20,6 @@ private:
 
 }
 
-#endif
+}
+
+#endif // _DEVICE_H_

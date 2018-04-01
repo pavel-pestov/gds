@@ -5,7 +5,9 @@
 #include "../utils/logger.h"
 #include "../utils/utils.h"
 
-namespace core {
+namespace gds {
+
+namespace ocl {
 
 Device::Device(const cl_device_id &device)
 {
@@ -97,6 +99,8 @@ std::vector<Device> Device::get_devices()
         }
     }
     return out;
+}
+
 }
 
 }
