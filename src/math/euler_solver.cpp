@@ -4,6 +4,17 @@ namespace gds {
 
 namespace math {
 
+double4 euler_limiter(double4 x)
+{
+    if (fabs(x[2]) > sqrt((fabs(x[1] * x[3]) + 1e-20) / (fabs(x[0]) + 1e-20)))
+        x[2] *= 0.5;
+    else if (x[0] < x[1])
+        x[1] = (fabs(x[1]) + 1.0) * 0.5;
+    else
+        x[0] = (fabs(x[0]) + 1.0) * 0.5;
+    return x;
+}
+
 double4 euler_solver(const double4& l, const double4& x, const double4& r, const float tdh)
 {
     double4 n;
@@ -23,6 +34,8 @@ double4 euler_solver(const double4& l, const double4& x, const double4& r, const
     if (n[1] < 0.0)
         n[1] = 0.0;
     n[3] = x[3];
+    if (!isfinite(n[0] + n[1] + n[2] + n[3]))
+        n = euler_limiter(x);
     return n;
 }
 
