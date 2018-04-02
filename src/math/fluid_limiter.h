@@ -7,10 +7,10 @@ namespace gds {
 
 namespace math {
 
-class FluidCorrector
+class FluidLimiter
 {
 public:
-    FluidCorrector();
+    FluidLimiter();
     double4 operator()(const double4& l, const double4& x, const double4& r, const float tdh);
 };
 

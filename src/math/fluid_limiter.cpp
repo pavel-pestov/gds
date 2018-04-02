@@ -1,4 +1,4 @@
-#include "fluid_corrector.h"
+#include "fluid_limiter.h"
 
 namespace gds {
 
@@ -43,12 +43,12 @@ double4 fluid_corrector(const double4& l, const double4& x, const double4& r, co
     return double4(x[0], x[1], x[2] * cv, x[3]);
 }
 
-FluidCorrector::FluidCorrector()
+FluidLimiter::FluidLimiter()
 {
 
 }
 
-double4 FluidCorrector::operator()(const double4& l, const double4& x, const double4& r, const float tdh)
+double4 FluidLimiter::operator()(const double4& l, const double4& x, const double4& r, const float tdh)
 {
     return fluid_corrector(l, x, r, tdh);
 }
