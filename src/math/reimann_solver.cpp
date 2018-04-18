@@ -21,7 +21,7 @@ double4 vacum_solver(const double4& g, double d)
         return g;
     cc = (c * 2.0 + d * (g[3] - 1.0) * g[2]) / (g[3] + 1.0);
     c = cc / c;
-    return {g[0] * pow(c, g1), g[1] * pow(c, g[3] * g1), d  * cc, g[3]};
+    return double4(g[0] * pow(c, g1), g[1] * pow(c, g[3] * g1), d  * cc, g[3]);
 }
 
 double4 safe_solver(const double4& l, const double4& r)

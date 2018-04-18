@@ -17,7 +17,7 @@ double E(const double4& x)
     return x[1] / (x[3] - 1.0) + x[0] * x[2] * x[2] * 0.5;
 }
 
-double4 fluid_corrector(const double4& l, const double4& x, const double4& r, const float tdh)
+double4 fluid_limiter(const double4& l, const double4& x, const double4& r, const float tdh)
 {
     if (x[0] <= 0.0f)
         return double4();
@@ -50,7 +50,7 @@ FluidLimiter::FluidLimiter()
 
 double4 FluidLimiter::operator()(const double4& l, const double4& x, const double4& r, const float tdh)
 {
-    return fluid_corrector(l, x, r, tdh);
+    return fluid_limiter(l, x, r, tdh);
 }
 
 }
