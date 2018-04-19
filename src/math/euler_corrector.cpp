@@ -17,16 +17,7 @@ double EulerCorrector::third_order_plus(const double dl, const double dr, const 
     sh = sign(dl) * sign(dr);
     if (c1 * (3.0 + sh) < c2) {
         sh /= (c1 + c2);
-        if (sh > 0) {
-            if (c1 * 7.0 < c2) {
-                sh *= 1.5 * c1;
-                c2 = 0.5 * c1 / (c2 - c1);
-                c1 = sh;
-            } else {
-                c1 = (1.0 / 12.0) * (c1 * 11.0 + c2) * sh;
-                c2 = 1.0 / 12.0;
-            }
-        } else {
+        if (sh < 0) {
             if (c1 * 3.0 < c2) {
                 sh *= -0.5 * c1;
                 c1 = 0.5 * c1 / (c2 - c1);
@@ -34,6 +25,15 @@ double EulerCorrector::third_order_plus(const double dl, const double dr, const 
             } else {
                 c2 = -0.25 * (c2 - c1) * sh;
                 c1 = 0.25;
+            }
+        } else {
+            if (c1 * 7.0 < c2) {
+                sh *= 1.5 * c1;
+                c2 = 0.5 * c1 / (c2 - c1);
+                c1 = sh;
+            } else {
+                c1 = (1.0 / 12.0) * (c1 * 11.0 + c2) * sh;
+                c2 = 1.0 / 12.0;
             }
         }
     } else {
