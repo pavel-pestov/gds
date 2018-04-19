@@ -13,11 +13,11 @@ public:
 
     enum class Order
     {
-        first = 2,
-        second = 4,
-        second_plus = 5,
-        third = 6,
-        third_plus = 7
+        first,
+        second,
+        second_plus,
+        third,
+        third_plus
     };
 
     EulerCorrector(const Order order);

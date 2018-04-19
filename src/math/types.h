@@ -38,7 +38,7 @@ template<typename T> inline T zero6(T x)
     return x * (static_cast<T>(2) - x) * static_cast<T>(1.000002003) - static_cast<T>(0.0000002003);
 }
 
-template <typename T> T sign(T x) {
+template <typename T> int sign(T x) {
     return (T(0) < x) - (x < T(0));
 }
 

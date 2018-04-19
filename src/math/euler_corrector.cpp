@@ -14,35 +14,41 @@ double EulerCorrector::third_order_plus(const double dl, const double dr, const 
         c1 = c2;
         c2 = sh;
     }
-    sh = fabs(sign(dl) - sign(dr));
-    if (sh < 0.5 && c1 * 4.0 < c2) {
-        sh = c1 + c2;
-        if (c1 * 8.0 < sh) {
-            c2 = 0.5 * c1 / (c2 - c1);
-            c1 = 1.5 * c1 / sh;
+    sh = sign(dl) * sign(dr);
+    if (c1 * (3.0 + sh) < c2) {
+        sh /= (c1 + c2);
+        if (sh > 0) {
+            if (c1 * 7.0 < c2) {
+                sh *= 1.5 * c1;
+                c2 = 0.5 * c1 / (c2 - c1);
+                c1 = sh;
+            } else {
+                c1 = (1.0 / 12.0) * (c1 * 11.0 + c2) * sh;
+                c2 = 1.0 / 12.0;
+            }
         } else {
-            c1 = (c1 * 10.0 + sh) / (sh * 12.0);
-            c2 = 1.0 / 12.0;
+            if (c1 * 3.0 < c2) {
+                sh *= -0.5 * c1;
+                c1 = 0.5 * c1 / (c2 - c1);
+                c2 = sh;
+            } else {
+                c2 = -0.25 * (c2 - c1) * sh;
+                c1 = 0.25;
+            }
         }
-    } else if (sh > 0.5 && c1 * 3.5 < c2) {
-        c2 = c1 / (4.0 * c2 - 2.0 * c1);
-        c1 = c2 * 3.0;
     } else {
         c1 = 0.25;
         c2 = 1.0 / 12.0;
     }
     sh = sign(shift);
-    return c1 * (dr + dl) * (sh - shift) + c2 * (dr - dl) * (shift * (shift * 2.0 - sh * 3.0) + 1.0);
+    return c1 * (dr + dl) * (sh - shift) + c2 * (dr - dl) * (shift * (shift + shift - sh * 3.0) + 1.0);
 }
 
 double EulerCorrector::third_order(const double dl, const double dr, const double shift)
 {
-    double c = fabs(dl);
-    double sh = fabs(dr);
-    sh = min(sh, c);
-    c = fabs(dl - dr);
-    c = fabs(sign(dl) - sign(dr)) < 0.5 ? -c : c;
-    c = c + fabs(dl + dr) * 3.0;
+    double c = fabs(dl - dr);
+    double sh = min(fabs(dl), fabs(dr));
+    c = (sign(dl) == sign(dr) ? -c : c) + fabs(dl + dr) * 3.0;
     c = sh * 12.0 < c ? sh / c : 1.0 / 12.0;
     sh = sign(shift);
     return c * ((dr + dl) * (sh - shift) * 3.0 + (dr - dl) * (shift * (shift + shift - sh * 3.0) + 1.0));
