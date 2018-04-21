@@ -20,7 +20,7 @@ double EulerCorrector::third_order_plus(const double dl, const double dr, const 
             sh = (1.0 + 0.5 * sh) * c1 / (c1 + c2);
             c2 = 0.5 * c1 / (c2 - c1);
             c1 = sh;
-        } else  {
+        } else {
             sh = (2.0 - sh) / 12.0;
             c1 = sh * ((17.0 - 72.0 * sh) * c1 + c2) / (c1 + c2);
             c2 = sh;
