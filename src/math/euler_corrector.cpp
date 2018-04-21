@@ -17,13 +17,12 @@ double EulerCorrector::third_order_plus(const double dl, const double dr, const 
     sh = 1 - (((dl < 0.0) ^ (dr < 0.0)) << 1);
     if (c1 * (3.0 + sh) < c2) {
         if (c1 * (5.0 + sh + sh) < c2) {
-            sh = (1.0 + 0.5 * sh) * c1 / (c1 + c2);
-            c2 = 0.5 * c1 / (c2 - c1);
-            c1 = sh;
-        } else {
-            sh = (2.0 - sh) / 12.0;
-            c1 = sh * ((17.0 - 72.0 * sh) * c1 + c2) / (c1 + c2);
+            sh = (2.0 + sh) * c1 / (6.0 * (c2 - c1)) ;
+            c1 = c1 / (2.0 * (c1 + c2));
             c2 = sh;
+        } else {
+            c1 = (1.25 - sh) * ((5.0 + 6.0 * sh) * c1 + c2) / (9.0 * (c1 + c2));
+            c2 = 1.0 / 12.0;
         }
         if ((dl < 0.0) ^ (dr < 0.0))
         {
@@ -32,11 +31,10 @@ double EulerCorrector::third_order_plus(const double dl, const double dr, const 
             c2 = sh;
         }
     } else {
-        c1 = 0.25;
-        c2 = 1.0 / 12.0;
+        c1 = c2 = 1.0 / 12.0;
     }
-    sh = sign(shift);
-    return c1 * (dr + dl) * (sh - shift) + c2 * (dr - dl) * (shift * (shift + shift - 3.0 * sh) + 1.0);
+    sh = 3.0 * (sign(shift) - shift);
+    return c1 * (dr + dl) * sh + c2 * (dr - dl) * (1.0 - shift * (sh + shift));
 }
 
 double EulerCorrector::third_order(const double dl, const double dr, const double shift)
@@ -46,15 +44,17 @@ double EulerCorrector::third_order(const double dl, const double dr, const doubl
     c = 3.0 * fabs(dl + dr) - sh * c;
     sh = min(fabs(dl), fabs(dr));
     c = 12.0 * sh < c ? sh / c : 1.0 / 12.0;
-    sh = sign(shift);
-    return c * (3.0 * (dr + dl) * (sh - shift) + (dr - dl) * (shift * (shift + shift - 3.0 * sh) + 1.0));
+    sh = 3.0 * (sign(shift) - shift);
+    return c * ((dr + dl) * sh + (dr - dl) * (1.0 - shift * (sh + shift)));
 }
 
 double EulerCorrector::second_order_plus(const double dl, const double dr, const double shift)
 {
     double c = min(fabs(dl), fabs(dr));
-    c = 4.0 * c < fabs(dl + dr) ? c / fabs(dl + dr) : 0.25;
-    return c * (sign(shift) - shift) * (dl + dr);
+    double sh = fabs(dl + dr);
+    c = 4.0 * c < sh ? c / sh : 0.25;
+    sh = sign(shift) - shift;
+    return c * sh * (dl + dr);
 }
 
 double EulerCorrector::second_order(const double dl, const double dr, const double shift)
