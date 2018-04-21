@@ -16,7 +16,7 @@ double EulerCorrector::third_order_plus(const double dl, const double dr, const 
     }
     sh = 1 - (((dl < 0.0) ^ (dr < 0.0)) << 1);
     if (c1 * (3.0 + sh) < c2) {
-        if (c1 * (5.0 + 2.0 * sh) < c2) {
+        if (c1 * (5.0 + sh + sh) < c2) {
             sh = (1.0 + 0.5 * sh) * c1 / (c1 + c2);
             c2 = 0.5 * c1 / (c2 - c1);
             c1 = sh;
