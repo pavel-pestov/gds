@@ -4,7 +4,7 @@ namespace gds {
 
 namespace math {
 
-double EulerCorrector::third_order_plus(const double dl, const double dr, const double shift)
+double EulerCorrector::third_order_full(const double dl, const double dr, const double shift)
 {
     double sh;
     double c1 = fabs(dr);
@@ -19,11 +19,10 @@ double EulerCorrector::third_order_plus(const double dl, const double dr, const 
         if (c1 * (5.0 + sh + sh) < c2) {
             sh = (2.0 + sh) * c1 / (6.0 * (c2 - c1)) ;
             c2 += c1;
-            c1 = c1 / (c2 + c2);
+            c1 /= c2 + c2;
             c2 = sh;
         } else {
-            c2 += c1;
-            c1 = (1.25 - sh) * ((4.0 + 6.0 * sh) * c1 + c2) / (9.0 * c2);
+            c1 = (1.25 - sh) * ((5.0 + 6.0 * sh) * c1 + c2) / (9.0 * (c1 + c2));
             c2 = 1.0 / 12.0;
         }
         if ((dl < 0.0) ^ (dr < 0.0))
@@ -39,7 +38,7 @@ double EulerCorrector::third_order_plus(const double dl, const double dr, const 
     return c1 * (dr + dl) * sh + c2 * (dr - dl) * (1.0 - shift * (sh + shift));
 }
 
-double EulerCorrector::third_order(const double dl, const double dr, const double shift)
+double EulerCorrector::third_order_fast(const double dl, const double dr, const double shift)
 {
     double c = fabs(dl - dr);
     double sh = 1 - (((dl < 0.0) ^ (dr < 0.0)) << 1);
@@ -50,7 +49,7 @@ double EulerCorrector::third_order(const double dl, const double dr, const doubl
     return c * ((dr + dl) * sh + (dr - dl) * (1.0 - shift * (sh + shift)));
 }
 
-double EulerCorrector::second_order_plus(const double dl, const double dr, const double shift)
+double EulerCorrector::second_order_full(const double dl, const double dr, const double shift)
 {
     double c = min(fabs(dl), fabs(dr));
     double sh = fabs(dl + dr);
@@ -59,7 +58,7 @@ double EulerCorrector::second_order_plus(const double dl, const double dr, const
     return c * sh * (dl + dr);
 }
 
-double EulerCorrector::second_order(const double dl, const double dr, const double shift)
+double EulerCorrector::second_order_fast(const double dl, const double dr, const double shift)
 {
     double c = dl * dr;
     return c <= 0.0 ? 0.0 : (sign(shift) - shift) * c / (dl + dr);
@@ -114,17 +113,17 @@ double4 EulerCorrector::euler_correction(const double4& l, const double4& x, con
 EulerCorrector::EulerCorrector(const Order order)
 {
     switch (order) {
-    case Order::second:
-        high_order = &second_order;
+    case Order::second_fast:
+        high_order = &second_order_fast;
         break;
-    case Order::second_plus:
-        high_order = &second_order_plus;
+    case Order::second_full:
+        high_order = &second_order_full;
         break;
-    case Order::third:
-        high_order = &third_order;
+    case Order::third_fast:
+        high_order = &third_order_fast;
         break;
-    case Order::third_plus:
-        high_order = &third_order_plus;
+    case Order::third_full:
+        high_order = &third_order_full;
         break;
     default:
         high_order = &first_order;
