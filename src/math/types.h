@@ -20,7 +20,7 @@ template<typename T> inline T sgn(const T x)
     return x < static_cast<T>(0) ? static_cast<T>(-1) :  static_cast<T>(1);
 }
 
-template<typename T> inline T zero3(T x)
+template<typename T> inline T zero3(const T x)
 {
     if (static_cast<T>(1) <= x)
         return static_cast<T>(1);
@@ -29,7 +29,7 @@ template<typename T> inline T zero3(T x)
     return x * (static_cast<T>(2) - x) * static_cast<T>(1.002003004) - static_cast<T>(0.002003004);
 }
 
-template<typename T> inline T zero6(T x)
+template<typename T> inline T zero6(const T x)
 {
     if (static_cast<T>(1) <= x)
         return static_cast<T>(1);
@@ -38,7 +38,7 @@ template<typename T> inline T zero6(T x)
     return x * (static_cast<T>(2) - x) * static_cast<T>(1.000002003) - static_cast<T>(0.0000002003);
 }
 
-template <typename T> inline T sign(T x) {
+template <typename T> inline T sign(const T x) {
     return 1 - ((x < T(0)) << 1);
 }
 
