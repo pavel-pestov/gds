@@ -19,8 +19,7 @@ double EulerCorrector::third_order_full(const double dl, const double dr, const 
             c1 = (1.25 - sh) * ((5.0 + 6.0 * sh) * c1 + c2) / (9.0 * (c1 + c2));
             c2 = 1.0 / 12.0;
         }
-        if ((dl < 0.0) ^ (dr < 0.0))
-        {
+        if ((dl < 0.0) ^ (dr < 0.0)) {
             sh = c1;
             c1 = c2;
             c2 = sh;
