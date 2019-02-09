@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-namespace gds {
-
 Logger* Logger::_this = nullptr;
 
 Logger::Logger()
@@ -38,4 +36,3 @@ void Logger::log(const std::string& text)
     std::cout << text << std::endl;
 }
 
-}

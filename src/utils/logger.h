@@ -4,9 +4,7 @@
 #include <string>
 #include <mutex>
 
-#define LOG(text) gds::Logger::instance().log(text)
-
-namespace gds {
+#define LOG(text) Logger::instance().log(text)
 
 class Logger
 {
@@ -22,7 +20,5 @@ private:
     static Logger* _this;
     std::mutex _mutex;
 };
-
-}
 
 #endif // _LOGGER_H_

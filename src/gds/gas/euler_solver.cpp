@@ -2,9 +2,8 @@
 
 namespace gds {
 
-namespace math {
-
-double4 euler_limiter(double4 x)
+template<typename T>
+vector4<T> euler_limiter(vector4<T> x)
 {
     if (fabs(x[2]) > sqrt((fabs(x[1] * x[3]) + 1e-20) / (fabs(x[0]) + 1e-20)))
         x[2] *= 0.5;
@@ -15,12 +14,13 @@ double4 euler_limiter(double4 x)
     return x;
 }
 
-double4 euler_solver(const double4& l, const double4& x, const double4& r, const float tdh)
+template<typename T>
+vector4<T> euler_solver(const vector4<T>& l, const vector4<T>& x, const vector4<T>& r, const T tdh)
 {
-    double4 n;
+    vector4<T> n;
     n[0] = x[0] + (l[0] * l[2] - r[0] * r[2]) * tdh;
     if (n[0] <= 1e-20)
-        return double4();
+        return vector4<T>();
     n[2] = 1.0f / n[0];
     n[3] = n[2] * tdh;
     n[2] = x[0] * x[2] * n[2];
@@ -37,18 +37,6 @@ double4 euler_solver(const double4& l, const double4& x, const double4& r, const
     if (!isfinite(n[0] + n[1] + n[2] + n[3]))
         n = euler_limiter(x);
     return n;
-}
-
-EulerSolver::EulerSolver()
-{
-
-}
-
-double4 EulerSolver::operator()(const double4& l, const double4& x, const double4& r, const float tdh)
-{
-    return euler_solver(l, x, r, tdh);
-}
-
 }
 
 }

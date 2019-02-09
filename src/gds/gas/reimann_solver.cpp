@@ -2,64 +2,65 @@
 
 namespace gds {
 
-namespace math {
-
-double4 vacum_solver(const double4& g, double d)
+template<typename T>
+vector4<T> vacum_solver(const vector4<T>& g, T d)
 {
-    double c, cc, g1 =  2.0 / (g[3] - 1.0);
+    T c, cc, g1 =  2.0 / (g[3] - 1.0);
     if (g[0] <= 0.0)
-        return double4();
+        return vector4<T>();
     if (g[1] <= 0.0)
         if ((d > 0) ? g[2] > 0 : g[2] < 0)
             return g;
         else
-            return double4();
+            return vector4<T>();
     c = sqrt(g[3] * g[1] / g[0]);
     if (d > 0 ? g[2] <= -c * g1 : g[2] >= c * g1)
-        return double4();
+        return vector4<T>();
     if (d > 0 ? g[2] >= c : g[2] <= -c)
         return g;
     cc = (c * 2.0 + d * (g[3] - 1.0) * g[2]) / (g[3] + 1.0);
     c = cc / c;
-    return double4(g[0] * pow(c, g1), g[1] * pow(c, g[3] * g1), d  * cc, g[3]);
+    return vector4<T>(g[0] * pow(c, g1), g[1] * pow(c, g[3] * g1), d  * cc, g[3]);
 }
 
-double4 safe_solver(const double4& l, const double4& r)
+template<typename T>
+vector4<T> safe_solver(const vector4<T>& l, const vector4<T>& r)
 {
-    double cl = sqrt(l[3] * l[1] / l[0]) + 1e-20;
-    double cr = sqrt(r[3] * r[1] / r[0]) + 1e-20;
-    double al = l[0] * (l[2] - min(l[2] - cl, r[2] - cr));
-    double ar = r[0] * (max(l[2] + cl, r[2] + cr) - r[2]);
-    double p = (l[1] * ar + r[1] * al - ar * al * (r[2] - l[2])) / (al + ar);
-    double v = (r[2] * ar + l[2] * al - r[1] + l[1]) / (al + ar);
+    T cl = sqrt(l[3] * l[1] / l[0]) + 1e-20;
+    T cr = sqrt(r[3] * r[1] / r[0]) + 1e-20;
+    T al = l[0] * (l[2] - min(l[2] - cl, r[2] - cr));
+    T ar = r[0] * (max(l[2] + cl, r[2] + cr) - r[2]);
+    T p = (l[1] * ar + r[1] * al - ar * al * (r[2] - l[2])) / (al + ar);
+    T v = (r[2] * ar + l[2] * al - r[1] + l[1]) / (al + ar);
     if (!isfinite(p + v))
-        return double4(NAN);
+        return vector4<T>(NAN);
     if (v >= 0) {
         if(l[2] - al / l[0] >= 0) {
             return l;
         } else {
-            return double4(1.0 / (1.0 / l[0] + (v - l[2]) / al), p, v, l[3]);
+            return vector4<T>(1.0 / (1.0 / l[0] + (v - l[2]) / al), p, v, l[3]);
         }
     } else {
         if(r[2] + ar / r[0] <= 0) {
             return r;
         } else {
-            return double4(1.0 / (1.0 / r[0] - (v - r[2]) / ar), p, v, r[3]);
+            return vector4<T>(1.0 / (1.0 / r[0] - (v - r[2]) / ar), p, v, r[3]);
         }
     }
 }
 
-double4 fast_solver(double4 l, double4 r)
+template<typename T>
+vector4<T> fast_solver(vector4<T> l, vector4<T> r)
 {
-    double cl = sqrt(l[3] * l[1] / l[0]);
-    double cr = sqrt(r[3] * r[1] / r[0]);
-    double al = l[0] * (l[2] - min(l[2] - cl, r[2] - cr));
-    double ar = r[0] * (max(l[2] + cl, r[2] + cr) - r[2]);
-    double p = (l[1] * ar + r[1] * al - ar * al * (r[2] - l[2])) / (al + ar);
-    double v = (l[3] + 1.0) / (4.0 * l[3] * l[1]);
-    double u = (r[3] + 1.0) / (4.0 * r[3] * r[1]);
-    double ro = al;
-    double n = ar;
+    T cl = sqrt(l[3] * l[1] / l[0]);
+    T cr = sqrt(r[3] * r[1] / r[0]);
+    T al = l[0] * (l[2] - min(l[2] - cl, r[2] - cr));
+    T ar = r[0] * (max(l[2] + cl, r[2] + cr) - r[2]);
+    T p = (l[1] * ar + r[1] * al - ar * al * (r[2] - l[2])) / (al + ar);
+    T v = (l[3] + 1.0) / (4.0 * l[3] * l[1]);
+    T u = (r[3] + 1.0) / (4.0 * r[3] * r[1]);
+    T ro = al;
+    T n = ar;
     al = ro * (1.0 + (p - l[1]) * v);
     ar = n * (1.0 + (p - r[1]) * u);
     p = (l[1] * ar + r[1] * al - ar * al * (r[2] - l[2])) / (al + ar);
@@ -69,7 +70,7 @@ double4 fast_solver(double4 l, double4 r)
     ar = n * (1.0 + ar * (1.0 - 0.5 * ar * (1.0 - ar)));
     v  = (al * l[2] + ar * r[2] - r[1] + l[1]) / (al + ar);
     if (!isfinite(p + v))
-        return double4(NAN);
+        return vector4<T>(NAN);
     n = 1.0;
     if (v >= 0.0) {
         v = -v;
@@ -110,16 +111,17 @@ double4 fast_solver(double4 l, double4 r)
             v = -l[2];
         }
     }
-    return double4(ro, p, v * n, r[3]);
+    return vector4<T>(ro, p, v * n, r[3]);
 }
 
-double4 full_solver(double4 l, double4 r)
+template<typename T>
+vector4<T> full_solver(vector4<T> l, vector4<T> r)
 {
-    double ro, p, v, f, d, dp;
-    double cl = sqrt(l[3] * l[1] / l[0]);
-    double cr = sqrt(r[3] * r[1] / r[0]);
-    double al = l[1] > r[1] ? r[1] : l[1];
-    double ar = l[1] > r[1] ? l[1] : r[1];
+    T ro, p, v, f, d, dp;
+    T cl = sqrt(l[3] * l[1] / l[0]);
+    T cr = sqrt(r[3] * r[1] / r[0]);
+    T al = l[1] > r[1] ? r[1] : l[1];
+    T ar = l[1] > r[1] ? l[1] : r[1];
     p = 0.5 * (l[1] + r[1]) + 0.125 * (l[2] - r[2]) * (l[0] + r[0]) * (cl + cr);
 
     f = l[3] - 1.0;
@@ -169,7 +171,7 @@ double4 full_solver(double4 l, double4 r)
     v = 0.5 * (l[2] + r[2] + v);
 
     if (!isfinite(p+v))
-        return double4(NAN);
+        return vector4<T>(NAN);
 
     dp = 1.0;
     if (v >= 0.0) {
@@ -211,14 +213,15 @@ double4 full_solver(double4 l, double4 r)
             v = -l[2];
         }
     }
-    return double4(ro, p, v * dp, r[3]);
+    return vector4<T>(ro, p, v * dp, r[3]);
 }
 
-double4 rieman_solver(const double4& l, const double4& r)
+template<typename T>
+vector4<T> rieman_solver(const vector4<T>& l, const vector4<T>& r)
 {
-    double4 fluid(NAN);
-    float cl = sqrt(l[1] * l[3] / l[0]);
-    float cr = sqrt(r[1] * r[3] / r[0]);
+    vector4<T> fluid(NAN);
+    T cl = sqrt(l[1] * l[3] / l[0]);
+    T cr = sqrt(r[1] * r[3] / r[0]);
     if (r[0] <= 1e-20 || cr * (2.0 / (r[3] - 1.0)) < r[2]) {
         fluid = vacum_solver(l, 1.0);
     } else if (l[0] <= 1e-20 || -cl * (2.0 / (l[3] - 1.0)) > l[2]) {
@@ -236,18 +239,6 @@ double4 rieman_solver(const double4& l, const double4& r)
         fluid = safe_solver(l, r);
     }
     return fluid;
-}
-
-ReimannSolver::ReimannSolver()
-{
-
-}
-
-double4 ReimannSolver::operator()(const double4& l, const double4& r) const
-{
-    return rieman_solver(l, r);
-}
-
 }
 
 }
