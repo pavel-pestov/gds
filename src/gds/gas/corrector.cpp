@@ -2,6 +2,46 @@
 
 namespace gds {
 
+double c3(double hl, double hm, double hr, double dl, double dr, double shift)
+{
+    double du = (dl + dr) * hm * 2.0 / (hl + hm + hm + hr);
+    double d2u = (dr * (hm + hl) - dl * (hm + hr)) * hm * hm * 8.0 / ((hm + hl) * (hm + hr) * (hl + hm + hm + hr));
+    double fdu = fabs(du);
+    double fd2u = fabs(d2u);
+    double dmin = min(fabs(dl), fabs(dr));
+    double d1m = fdu / 2.0;
+    double d2m = fd2u / 12.0;
+
+    double c1 = 1;
+    double c2 = 1;
+    if (dl * dr > 0)
+    {// monotonic
+        if (d1m - d2m > dmin)
+        { // need correction
+            c1 = (dmin + d2m) / d1m;
+            if (c1 * 2 * fdu < fd2u * c2) {
+                c1 = 2 * dmin / (d1m + 2 * d2m * fdu / fd2u);
+                c2 = c1 * 2 * fdu / fd2u;
+            }
+        }
+    }
+    else
+    {// not monotonic
+          if (d2m < d1m)
+          {
+              c1 = d2m / d1m;
+          }
+          if (dmin < c1 * d1m + d2m)
+          {
+              c2 = (d2m - (c1 * d1m + d2m - dmin) / 2) / (d2m);
+              c1 *= (c1 * d1m - (c1 * d1m + c2 * d2m - dmin)) / (c1 * d1m);
+          }
+    }
+    double sh = ((shift < 0.0) ? -1 : 1);
+    shift /= hm;
+    return c1 * du * (sh - shift) / (2) + c2 * d2u * (shift * (shift * 2.0 - sh * 3.0) + 1.0) / ( 12.0);
+}
+
 template<typename T>
 T order3(const T dl, const T dr, const T shift)
 {
