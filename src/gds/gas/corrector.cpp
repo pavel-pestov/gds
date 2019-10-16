@@ -2,72 +2,33 @@
 
 namespace gds {
 
-double c3(double hl, double hm, double hr, double dl, double dr, double shift)
-{
-    double du = (dl + dr) * hm * 2.0 / (hl + hm + hm + hr);
-    double d2u = (dr * (hm + hl) - dl * (hm + hr)) * hm * hm * 8.0 / ((hm + hl) * (hm + hr) * (hl + hm + hm + hr));
-    double fdu = fabs(du);
-    double fd2u = fabs(d2u);
-    double dmin = min(fabs(dl), fabs(dr));
-    double d1m = fdu / 2.0;
-    double d2m = fd2u / 12.0;
-
-    double c1 = 1;
-    double c2 = 1;
-    if (dl * dr > 0)
-    {// monotonic
-        if (d1m - d2m > dmin)
-        { // need correction
-            c1 = (dmin + d2m) / d1m;
-            if (c1 * 2 * fdu < fd2u * c2) {
-                c1 = 2 * dmin / (d1m + 2 * d2m * fdu / fd2u);
-                c2 = c1 * 2 * fdu / fd2u;
-            }
-        }
-    }
-    else
-    {// not monotonic
-          if (d2m < d1m)
-          {
-              c1 = d2m / d1m;
-          }
-          if (dmin < c1 * d1m + d2m)
-          {
-              c2 = (d2m - (c1 * d1m + d2m - dmin) / 2) / (d2m);
-              c1 *= (c1 * d1m - (c1 * d1m + c2 * d2m - dmin)) / (c1 * d1m);
-          }
-    }
-    double sh = ((shift < 0.0) ? -1 : 1);
-    shift /= hm;
-    return c1 * du * (sh - shift) / (2) + c2 * d2u * (shift * (shift * 2.0 - sh * 3.0) + 1.0) / ( 12.0);
-}
-
 template<typename T>
-T order3(const T dl, const T dr, const T shift)
+T order3(T hl, T hm, T hr, T dl, T dr, T shift)
 {
-    T c1 = min(fabs(dl), fabs(dr));
-    T c2 = c1 + fabs(dl - dr);
-    T sh = 1 - (((dl < 0.0) ^ (dr < 0.0)) << 1);
-    if (c1 * (3.0 + sh) < c2) {
-        if (c1 * (5.0 + sh + sh) < c2) {
-            sh = (2.0 + sh) * c1 / (6.0 * (c2 - c1)) ;
-            c2 += c1;
-            c1 /= c2 + c2;
-            c2 = sh;
+    T du = (dl + dr) * hm * 2.0 / (hl + hm + hm + hr);
+    T d2u = ((hm + hl) * dr - (hm + hr) * dl) * hm * hm * 8.0 / ((hm + hl) * (hm + hr) * (hl + hm + hm + hr));
+    shift /= hm;
+    hl = fabs(du);
+    hr = fabs(d2u);
+    hm = fabs((fabs(dl) < fabs(dr)) ? dl : dr);
+    dr = dl * dr > 0.0 ? 1.0 : 0.0;
+    dl = hm * dr;
+    dl = (hr + 12.0 * dl < 6.0 * hl) ? (dl + hr / 12.0) / hl : 0.5;
+    if (16.0 * dr * dl * hl + (1.0 - dr) * 12.0 * hm < dl * hl * 12.0 + hr) {
+        if (dr > 0.5) {
+            dl = 1.5 * hm / hl;
+            dr = (dl * hl) / (3.0 * hr);
         } else {
-            c1 = (1.25 - sh) * ((5.0 + 6.0 * sh) * c1 + c2) / (9.0 * (c1 + c2));
-            c2 = 1.0 / 12.0;
-        }
-        if ((dl < 0.0) ^ (dr < 0.0)) {
-            sh = c1;
-            c1 = c2;
-            c2 = sh;
+            dr = (hm + hr / 12.0 - dl * hl) / (hr + hr);
+            dl = (hm - dr * hr) / hl;
         }
     } else {
-        c1 = c2 = 1.0 / 12.0;
+        dr = 1.0 / 12.0;
     }
-    sh = 3.0 * (sign(shift) - shift);
-    return c1 * (dr + dl) * sh + c2 * (dr - dl) * (1.0 - shift * (sh + shift));
+    hm = ((shift < 0.0) ? -1.0 : 1.0);
+    hl = hm - shift;
+    hr = shift * (hl + hl + hm) - 1.0;
+    return dl * du * hl - dr * d2u * hr;
 }
 
 template<typename T>
