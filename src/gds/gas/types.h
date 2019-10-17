@@ -44,20 +44,20 @@ template <typename T> inline T sign(const T x) {
 }
 
 template<typename T>
-class vector4
+class SimpleGas
 {
 public:
-    vector4()
+    SimpleGas()
     {
         _x[0] = _x[1] = _x[2] = _x[3] = 0.0;
     }
 
-    vector4(const T x)
+    SimpleGas(const T x)
     {
         _x[0] = _x[1] = _x[2] = _x[3] = x;
     }
 
-    vector4(const T x0, const T x1, const T x2, const T x3)
+    SimpleGas(const T x0, const T x1, const T x2, const T x3)
     {
         _x[0] = x0;
         _x[1] = x1;
@@ -65,12 +65,12 @@ public:
         _x[3] = x3;
     }
 
-    vector4(const T* x)
+    SimpleGas(const T* x)
     {
         memcpy(_x, x, 4 * sizeof(T));
     }
 
-    vector4& operator=(const T* x)
+    SimpleGas& operator=(const T* x)
     {
         memcpy(_x, x, 4 * sizeof(T));
         return *this;
@@ -202,6 +202,24 @@ public:
 
 private:
     T _x[4];
+};
+
+template<typename T>
+class SimpleCell
+{
+public:
+    SimpleGas<T> gas;
+    T h;
+
+    inline const T operator[](int i) const
+    {
+        return gas[i];
+    }
+
+    inline T& operator[](int i)
+    {
+        return gas[i];
+    }
 };
 
 }
