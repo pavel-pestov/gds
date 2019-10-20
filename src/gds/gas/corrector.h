@@ -13,24 +13,26 @@ T order3(T hl, T hm, T hr, T dl, T dr, T shift)
     shift /= hm;
     hl = fabs(du);
     hr = fabs(d2u);
-    hm = fabs((fabs(dl) < fabs(dr)) ? dl : dr);
-    dr = dl * dr < 0.0 ? 0.0 : 1.0;
+    hm = fabs(dl) < fabs(dr);
+    hm = fabs(hm * dl + (1.0 - hm) * dr);
+    dr = !((dl < 0.0) ^ (dr <= 0.0));
     dl = hm * dr;
-    dl = (hr + 12.0 * dl < 6.0 * hl) ? (dl + hr / 12.0) / hl : 0.5;
-    if (16.0 * dr * dl * hl + (1.0 - dr) * 12.0 * hm < dl * hl * 12.0 + hr) {
-        if (dr > 0.5) {
+    dl = hr + 12.0 * dl < 6.0 * hl ? (dl + hr / 12.0) / hl : 0.5;
+    if (((0.5 < dr && 4.0 * dl * hl < hr) || (dr < 0.5 && (hm - dl * hl) * 12.0 < hr)) && 0.0 < hl) {
+        if (0.5 < dr) {
             dl = 1.5 * hm / hl;
-            dr = (dl * hl) / (3.0 * hr);
+            dr = dl * hl / (3.0 * hr);
         } else {
-            dr = (hm + hr / 12.0 - dl * hl) / (hr + hr);
+            dr = (hm - dl * hl + hr / 12.0) / (hr + hr);
             dl = (hm - dr * hr) / hl;
         }
     } else {
         dr = 1.0 / 12.0;
     }
-    hm = ((shift < 0.0) ? -1.0 : 1.0);
+    hm = 0.0 < shift;
+    hm = hm + hm - 1.0;
     hl = hm - shift;
-    hr = shift * (hl + hl + hm) - 1.0;
+    hr = (hl + hl + hm) * shift - 1.0;
     return dl * du * hl - dr * d2u * hr;
 }
 
