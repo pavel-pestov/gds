@@ -8,28 +8,27 @@ namespace gds {
 template<typename T>
 T order3(T hl, T hm, T hr, T dl, T dr, T shift)
 {
-    T du = (dl + dr) * hm * 2.0 / (hl + hm + hm + hr);
-    T d2u = ((hm + hl) * dr - (hm + hr) * dl) * hm * hm * 8.0 / ((hm + hl) * (hm + hr) * (hl + hm + hm + hr));
+    T d2u = hm / (hl + hm + hm + hr);
+    T du = (dl + dr) * d2u;
+    d2u = ((hm + hl) * dr - (hm + hr) * dl) * d2u * hm / ((hm + hl) * (hm + hr) * 1.5);
     shift /= hm;
     hl = fabs(du);
     hr = fabs(d2u);
-    hm = fabs(dl) < fabs(dr);
-    hm = fabs(hm * dl + (1.0 - hm) * dr);
-    dr = !((dl < 0.0) ^ (dr <= 0.0));
+    hm = static_cast<T>(fabs(dl) < fabs(dr));
+    hm = fabs((dl - dr) * hm + dr);
+    dr = static_cast<T>(!((dl < 0.0) ^ (dr <= 0.0)));
     dl = hm * dr;
-    dl = hr + 12.0 * dl < 6.0 * hl ? (dl + hr / 12.0) / hl : 0.5;
-    if (((0.5 < dr && 4.0 * dl * hl < hr) || (dr < 0.5 && (hm - dl * hl) * 12.0 < hr)) && 0.0 < hl) {
-        if (0.5 < dr) {
-            dl = 1.5 * hm / hl;
-            dr = dl * hl / (3.0 * hr);
-        } else {
-            dr = (hm - dl * hl + hr / 12.0) / (hr + hr);
-            dl = (hm - dr * hr) / hl;
-        }
+    dl = static_cast<T>(hr + dl < hl) * (dl + hr - hl) + hl;
+    if ((0.5 < dr && dl < hr * 3.0) || (dr < 0.5 && hm - dl < hr)) {
+        dl = (hr - dl) * (dr - 1.0);
+        hm -= dl;
+        dl = (hm + dl + dl) * (dr + 0.5);
+        dr = hm / (hr + hr);
     } else {
-        dr = 1.0 / 12.0;
+        dr = 1.0;
     }
-    hm = 0.0 < shift;
+    dl = dl < hl ? dl / hl : 1.0;
+    hm = static_cast<T>(0.0 < shift);
     hm = hm + hm - 1.0;
     hl = hm - shift;
     hr = (hl + hl + hm) * shift - 1.0;
