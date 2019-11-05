@@ -1,6 +1,6 @@
 #include "utils/logger.h"
 #include "gds/gas/types.h"
-#include "gds/gas/corrector.h"
+#include "gds/gas/interpolation.h"
 
 int main(int argc, char * argv[])
 {
