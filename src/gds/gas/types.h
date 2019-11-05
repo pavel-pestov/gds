@@ -8,17 +8,17 @@ namespace gds {
 
 template<typename T> inline T min(const T a, const T b)
 {
-    return a < b ? a : b;
+    return static_cast<T>(a < b) * (a - b) + b;
 }
 
 template<typename T> inline T max(const T a, const T b)
 {
-    return a < b ? b : a;
+    return static_cast<T>(a < b) * (b - a) + a;
 }
 
 template<typename T> inline T sgn(const T x)
 {
-    return x < static_cast<T>(0) ? static_cast<T>(-1) :  static_cast<T>(1);
+    return static_cast<T>(0.0 < x) * 2.0 - 1.0;
 }
 
 template<typename T> inline T zero3(const T x)
@@ -44,20 +44,20 @@ template <typename T> inline T sign(const T x) {
 }
 
 template<typename T>
-class SimpleGas
+class Vector4
 {
 public:
-    SimpleGas()
+    Vector4()
     {
         _x[0] = _x[1] = _x[2] = _x[3] = 0.0;
     }
 
-    SimpleGas(const T x)
+    Vector4(const T x)
     {
         _x[0] = _x[1] = _x[2] = _x[3] = x;
     }
 
-    SimpleGas(const T x0, const T x1, const T x2, const T x3)
+    Vector4(const T x0, const T x1, const T x2, const T x3)
     {
         _x[0] = x0;
         _x[1] = x1;
@@ -65,12 +65,12 @@ public:
         _x[3] = x3;
     }
 
-    SimpleGas(const T* x)
+    Vector4(const T* x)
     {
         memcpy(_x, x, 4 * sizeof(T));
     }
 
-    SimpleGas& operator=(const T* x)
+    Vector4& operator=(const T* x)
     {
         memcpy(_x, x, 4 * sizeof(T));
         return *this;
@@ -208,7 +208,7 @@ template<typename T>
 class SimpleCell
 {
 public:
-    SimpleGas<T> gas;
+    Vector4<T> gas;
     T h;
 
     inline const T operator[](int i) const

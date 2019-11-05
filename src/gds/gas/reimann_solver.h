@@ -6,28 +6,28 @@
 namespace gds {
 
 template<typename T>
-SimpleGas<T> vacum_solver(const SimpleGas<T>& g, T d)
+Vector4<T> vacum_solver(const Vector4<T>& g, T d)
 {
     T c, cc, g1 =  2.0 / (g[3] - 1.0);
     if (g[0] <= 0.0)
-        return SimpleGas<T>();
+        return Vector4<T>();
     if (g[1] <= 0.0)
         if ((d > 0) ? g[2] > 0 : g[2] < 0)
             return g;
         else
-            return SimpleGas<T>();
+            return Vector4<T>();
     c = sqrt(g[3] * g[1] / g[0]);
     if (d > 0 ? g[2] <= -c * g1 : g[2] >= c * g1)
-        return SimpleGas<T>();
+        return Vector4<T>();
     if (d > 0 ? g[2] >= c : g[2] <= -c)
         return g;
     cc = (c * 2.0 + d * (g[3] - 1.0) * g[2]) / (g[3] + 1.0);
     c = cc / c;
-    return SimpleGas<T>(g[0] * pow(c, g1), g[1] * pow(c, g[3] * g1), d  * cc, g[3]);
+    return Vector4<T>(g[0] * pow(c, g1), g[1] * pow(c, g[3] * g1), d  * cc, g[3]);
 }
 
 template<typename T>
-SimpleGas<T> safe_solver(const SimpleGas<T>& l, const SimpleGas<T>& r)
+Vector4<T> safe_solver(const Vector4<T>& l, const Vector4<T>& r)
 {
     T cl = sqrt(l[3] * l[1] / l[0]) + 1e-20;
     T cr = sqrt(r[3] * r[1] / r[0]) + 1e-20;
@@ -36,24 +36,24 @@ SimpleGas<T> safe_solver(const SimpleGas<T>& l, const SimpleGas<T>& r)
     T p = (l[1] * ar + r[1] * al - ar * al * (r[2] - l[2])) / (al + ar);
     T v = (r[2] * ar + l[2] * al - r[1] + l[1]) / (al + ar);
     if (!isfinite(p + v))
-        return SimpleGas<T>(NAN);
+        return Vector4<T>(NAN);
     if (v >= 0) {
         if(l[2] - al / l[0] >= 0) {
             return l;
         } else {
-            return SimpleGas<T>(1.0 / (1.0 / l[0] + (v - l[2]) / al), p, v, l[3]);
+            return Vector4<T>(1.0 / (1.0 / l[0] + (v - l[2]) / al), p, v, l[3]);
         }
     } else {
         if(r[2] + ar / r[0] <= 0) {
             return r;
         } else {
-            return SimpleGas<T>(1.0 / (1.0 / r[0] - (v - r[2]) / ar), p, v, r[3]);
+            return Vector4<T>(1.0 / (1.0 / r[0] - (v - r[2]) / ar), p, v, r[3]);
         }
     }
 }
 
 template<typename T>
-SimpleGas<T> fast_solver(SimpleGas<T> l, SimpleGas<T> r)
+Vector4<T> fast_solver(Vector4<T> l, Vector4<T> r)
 {
     T cl = sqrt(l[3] * l[1] / l[0]);
     T cr = sqrt(r[3] * r[1] / r[0]);
@@ -73,7 +73,7 @@ SimpleGas<T> fast_solver(SimpleGas<T> l, SimpleGas<T> r)
     ar = n * (1.0 + ar * (1.0 - 0.5 * ar * (1.0 - ar)));
     v  = (al * l[2] + ar * r[2] - r[1] + l[1]) / (al + ar);
     if (!isfinite(p + v))
-        return SimpleGas<T>(NAN);
+        return Vector4<T>(NAN);
     n = 1.0;
     if (v >= 0.0) {
         v = -v;
@@ -114,11 +114,11 @@ SimpleGas<T> fast_solver(SimpleGas<T> l, SimpleGas<T> r)
             v = -l[2];
         }
     }
-    return SimpleGas<T>(ro, p, v * n, r[3]);
+    return Vector4<T>(ro, p, v * n, r[3]);
 }
 
 template<typename T>
-SimpleGas<T> full_solver(SimpleGas<T> l, SimpleGas<T> r)
+Vector4<T> full_solver(Vector4<T> l, Vector4<T> r)
 {
     T ro, p, v, f, d, dp;
     T cl = sqrt(l[3] * l[1] / l[0]);
@@ -174,7 +174,7 @@ SimpleGas<T> full_solver(SimpleGas<T> l, SimpleGas<T> r)
     v = 0.5 * (l[2] + r[2] + v);
 
     if (!isfinite(p+v))
-        return SimpleGas<T>(NAN);
+        return Vector4<T>(NAN);
 
     dp = 1.0;
     if (v >= 0.0) {
@@ -216,13 +216,13 @@ SimpleGas<T> full_solver(SimpleGas<T> l, SimpleGas<T> r)
             v = -l[2];
         }
     }
-    return SimpleGas<T>(ro, p, v * dp, r[3]);
+    return Vector4<T>(ro, p, v * dp, r[3]);
 }
 
 template<typename T>
-SimpleGas<T> rieman_solver(const SimpleGas<T>& l, const SimpleGas<T>& r)
+Vector4<T> rieman_solver(const Vector4<T>& l, const Vector4<T>& r)
 {
-    SimpleGas<T> fluid(NAN);
+    Vector4<T> fluid(NAN);
     T cl = sqrt(l[1] * l[3] / l[0]);
     T cr = sqrt(r[1] * r[3] / r[0]);
     if (r[0] <= 1e-20 || cr * (2.0 / (r[3] - 1.0)) < r[2]) {

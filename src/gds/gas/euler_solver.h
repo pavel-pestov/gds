@@ -6,7 +6,7 @@
 namespace gds {
 
 template<typename T>
-SimpleGas<T> euler_limiter(SimpleGas<T> x)
+Vector4<T> euler_limiter(Vector4<T> x)
 {
     if (fabs(x[2]) > sqrt((fabs(x[1] * x[3]) + 1e-20) / (fabs(x[0]) + 1e-20)))
         x[2] *= 0.5;
@@ -18,12 +18,12 @@ SimpleGas<T> euler_limiter(SimpleGas<T> x)
 }
 
 template<typename T>
-SimpleGas<T> euler_solver(const SimpleGas<T>& l, const SimpleGas<T>& m, const SimpleGas<T>& r, const T tdh)
+Vector4<T> euler_solver(const Vector4<T>& l, const Vector4<T>& m, const Vector4<T>& r, const T tdh)
 {
-    SimpleGas<T> n;
+    Vector4<T> n;
     n[0] = m[0] + (l[0] * l[2] - r[0] * r[2]) * tdh;
     if (n[0] <= 1e-20)
-        return SimpleGas<T>();
+        return Vector4<T>();
     n[2] = 1.0f / n[0];
     n[3] = n[2] * tdh;
     n[2] = m[0] * m[2] * n[2];

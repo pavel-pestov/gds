@@ -21,30 +21,27 @@ T order3(T hl, T hm, T hr, T dl, T dr, T shift)
     dl = static_cast<T>(hr + dl < hl) * (dl + hr - hl) + hl;
     if ((0.5 < dr && dl < hr * 3.0) || (dr < 0.5 && hm - dl < hr)) {
         dl = (hr - dl) * (dr - 1.0);
-        hm -= dl;
-        dl = (hm + dl + dl) * (dr + 0.5);
-        dr = hm / (hr + hr);
-    } else {
-        dr = 1.0;
+        d2u *= (hm - dl) / (hr + hr);
+        dl = (hm + dl) * (dr + 0.5);
     }
-    dl = dl < hl ? dl / hl : 1.0;
+    du = dl < hl ? du * dl / hl : du;
     hm = static_cast<T>(0.0 < shift);
     hm = hm + hm - 1.0;
-    hl = hm - shift;
-    hr = (hl + hl + hm) * shift - 1.0;
-    return dl * du * hl - dr * d2u * hr;
+    du *= hm - shift;
+    d2u *= (hm * 3.0 - shift - shift) * shift - 1.0;
+    return du - d2u;
 }
 
 template<typename T>
-SimpleGas<T> decomposition(const T dro, T dp, T dv, const T ro, const T bc, const T bc2)
+Vector4<T> decomposition(const T dro, T dp, T dv, const T ro, const T bc, const T bc2)
 {
     dp *= 0.5 * bc2;
     dv *= 0.5 * ro * bc;
-    return SimpleGas<T>(dp - dv, dro - dp - dp, dp + dv, 0);
+    return Vector4<T>(dp - dv, dro - dp - dp, dp + dv, 0);
 }
 
 template<typename T>
-SimpleGas<T> correction(SimpleCell<T> l, SimpleCell<T> m, SimpleCell<T> r, T t)
+Vector4<T> correction(SimpleCell<T> l, SimpleCell<T> m, SimpleCell<T> r, T t)
 {
     T c2 = m[3] * m[1] / m[0];
     T c = sqrt(c2);
@@ -52,23 +49,23 @@ SimpleGas<T> correction(SimpleCell<T> l, SimpleCell<T> m, SimpleCell<T> r, T t)
     T bc2 = bc * bc;
     l.gas = decomposition(m[0] - l[0], m[1] - l[1], m[2] - l[2], m[0], bc, bc2);
     r.gas = decomposition(r[0] - m[0], r[1] - m[1], r[2] - m[2], m[0], bc, bc2);
-    t / m.h;
+    t /= m.h;
     bc = t * m[2];
     t *= c;
     bc2 = m[0];
     m[0] = order3(l.h, m.h, r.h, l[0], r[0], bc - t);
     m[1] = order3(l.h, m.h, r.h, l[1], r[1], bc);
     m[2] = order3(l.h, m.h, r.h, l[2], r[2], bc + t);
-    return SimpleGas<T>((m[0] + m[2]) + m[1], c2 * (m[0] + m[2]), c * (m[2] - m[0]) / bc2, bc);
+    return Vector4<T>((m[0] + m[2]) + m[1], c2 * (m[0] + m[2]), c * (m[2] - m[0]) / bc2, bc);
 }
 
 template<typename T>
-SimpleGas<T> corrector(const SimpleCell<T>& l, const SimpleCell<T>& m, const SimpleCell<T>& r, const T t)
+Vector4<T> corrector(const SimpleCell<T>& l, const SimpleCell<T>& m, const SimpleCell<T>& r, const T t)
 {
-    float z = zero3(min(m[0], min(l[0], r[0])) * 1e3 / (max(m[0], max(l[0], r[0])) + 1e-20));
+    T z = zero3(min(m[0], min(l[0], r[0])) * 1e3 / (max(m[0], max(l[0], r[0])) + 1e-20));
     if (z <= 0.0)
         return m.gas;
-    SimpleGas<T> d = correction(l, m, r, t);
+    Vector4<T> d = correction(l, m, r, t);
     if (!isfinite(d[0] + d[1] + d[2]))
         return m.gas;
     d[0] *= z;
@@ -76,7 +73,7 @@ SimpleGas<T> corrector(const SimpleCell<T>& l, const SimpleCell<T>& m, const Sim
     d[2] *= z;
     if (d[0] <= -m[0] || d[1] <= -m[1])
         return m.gas;
-    return SimpleGas<T>(m[0] + d[0], m[1] + d[1], m[2] + d[2], m[3]);
+    return Vector4<T>(m[0] + d[0], m[1] + d[1], m[2] + d[2], m[3]);
 }
 
 template<typename T>
